@@ -69,12 +69,9 @@ def consensus(matrice,listeAA):
 
 
 def writeToFile(matrix, fileName,listeAA):
-        
     try:
         file = open(fileName, 'w')
-        
         lineIndex = 0
-        
         while (lineIndex != len(matrix)):
             columnIndex = 0
             while (columnIndex != len(matrix[0])):
@@ -90,13 +87,10 @@ def writeToFile(matrix, fileName,listeAA):
                 columnIndex = columnIndex + 1
             lineIndex = lineIndex + 1
             file.write(' ')
-        
         file.close()
         print ("Ecriture terminée")
-        
     except (IOError):
         print ("Impossible d'écrire dans le fichier")
-        
         return None
 
 if(__name__ == "__main__"):

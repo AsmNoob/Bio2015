@@ -1,10 +1,30 @@
 =====Projet 3: La construction de profils=====
 
-{{:f20814:start:333083:miniprojet3.zip|mini-projet-3}}
 ==== Introduction ====
+
+
+Une PSSM (Position Specific Scoring Matrix) permet de représenter un motif dans un groupe de séquences (de protéines dans notre cas). Elles sont très utiles pour représenter une famille ou un domaine de protéines dans son ensemble.
+Ce troisième projet consiste en l'implémentation d'un algorithme de création d'une PSSM et dans la vérification de sa pertinence biologique. Le principe est semblable à la construction d'une matrice de substitution mais en calculant le score pour chaque position de chaque acide aminé dans le groupe de séquence donné. On travaille avec un alignement multiple de séquences provenant du même domaine ou de la même famille dans le but de créer une PSSM spécifique à ce domaine ou cette famille.
+
+Pour commencer, je vais faire une introduction des deux domaines utilisés, s'en suivra une présentation de mon algorithme et de mon implémentation.
+
+L'archive zip est disponible ici :
+
+=== Domaine SH2 ===
+
+Le premier domaine que j'ai analysé est le domaine SH2. Ce domaine est contenu principalement dans l'oncoprotéine Src dont il tire son nom Src Homologuous 2 mais également dans d'autre protéines chargées de l'échange de messages entre les cellules.
+
+Le domaine SH2 permet à une protéine de s'attacher à d'autre protéines par un résidu tyrosine, c'est pourquoi on le trouve souvent dans des protéines impliquées dans la transduction d'un signal par les récepteurs tyrosines kinases qui sont liées entre autres choses à la conservation d'énergie sous forme d'ATP dans notre corps. Ces protéines, dont la famille Src fait partie, jouent un rôle dans beaucoup de fonctions cellulaire en permettant d'activer ou de désactiver des enzymes en leur attachant ou en leur détachant un ATP.
+On le trouve également dans des protéines impliquées dans la transcription ou dans des enzymes commet les phosphatases dans lesquelles son but est de détecter des tyrosines.
+
+Sa structure est formée de deux α-hélices à l'extérieur et de sept ß-feuillets anti-parallèles à l'intérieur. On peut le trouver dans de nombreux organismes, notamment l'être humain chez qui il est présent dans au moins 115 protéines identifiées à ce jour.
+
+
 Petite introduction sur les domaines avec lesquels on va travailler dans ce projet.
-Les intéraction protéine-protéine jouent un rôle important dans le développement et la croissance cellulaire. Les domaines modulaires, sous-unités des protéines, régulent ces intéractions en identifiant de courtes séquences peptidiques.
+Le domaine SH2 
+Dans SH2, es intéraction protéine-protéine jouent un rôle important dans le développement et la croissance cellulaire. Les domaines modulaires, sous-unités des protéines, régulent ces intéractions en identifiant de courtes séquences peptidiques.
 Un des domaines les plus proéminents est le domaine SH2 (100 acides aminés, trouvé dans 111 protéines hmaines) qui joue un rôle très important dans la communication cellulaire.
+
 Le SH3 est un domaine moins important (60 acides aminés et 300 domaines SH3 sont trouvés dans les protéines codant le génome humain). Son rôle principal est de réguler l'état d'activité des adaptateurs de protéines ainsi que des Tyrosine Kinases et on pense qu'il augmenterait la spécificité du substrat de certaines Tyrosine Kinases. Il est trouvé dans des protéines qui intéragissent et régulent un ensemble de protéines complexes. Il est susceptibles de se lier à des peptides riches en proline, se trouve en général à la surface des protéines cibles. Les domaines SH3 classiques sont contraints chez les humains, aux protéines intracellulaires.
 
 == Relations interdomaines ==

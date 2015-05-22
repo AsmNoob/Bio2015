@@ -1,11 +1,27 @@
 ===== Projet 4: Prédiction de la structure secndaire =====
 
+==== Introduction ====
 
-{{:f20814:start:333083:miniprojet4.zip|mini-projet-4}}
-==== Tests de l'algorithme ====
 
-Alors on va tout d'abord parser et traiter "CATH_info.txt" qui seront nos données d'entraînement, ensuite on va faire de même avec "CATH_info_test.txt" qui seront nos données de test. Dans "CATH_info.txt"et "CATH_info_test.txt" on va récupérer la liste des fichier ".dssp" à parser et les chaînes qui devront être parsées dans les fichiers.
-On utilise les données d'entraînement pour créer le dictionnaire qui va contenir les fréquences nécessaires pour le calcul des prédictions.
+La fonction d'une protéine et les intéractions entre plusieurs protéines dépendent directement de leur structure en trois dimensions qui elle-même dépend des différentes structures de segments locaux dans les protéines, appelées structure secondaire. Celle-ci est déterminée par les liens hydrogènes formés entre deux acides aminés (ou plus) de la protéine qui donnent au segment local une certaine structure. Les structures les plus courantes sont les α-helices, les ß-feuillet, les ß-tours et les bobines. 
+
+Un des objectifs les plus difficiles et les plus importants de la bioinformatique est la prédiction de ces structures secondaires à partir d'une séquence de protéines afin de déterminer les fonctions et les liaisons possibles d'une protéine nouvellement séquencée.
+
+L'algorithme GOR proposé par Jean Garnier et al. en 1978 analyse la probabilité qu'un acide aminé dans une séquence se trouve dans une certaine structure en fonction des acides aminés dans son entourage proche. Cet algorithme a été plusieurs fois amélioré depuis sa création (la dernière version en date est GOR V). J'ai implémenté ici la version III specifiée dans l'énoncé.
+
+Le programme fonctionne en trois phases. Premièrement, il s'agit de parser un ensemble de fichier DSSP afin de récupérer un ensemble de séquences associées à leur structure. Deuxièment, le programme extrait des fréquences de cet ensemble de séquences. Pour terminer, le programme tente de prédire la structure d'un ensemble de séquences à partir de ces fréquences.
+
+==== Les phases du programme ====
+
+=== Parsing des fichiers DSSP ===
+
+Le parsing des fichiers DSSP est trivial mais un point mérite d'être soulevé : afin d'optimiser l'utilisation de la mémoire, le programme parcoure d'abord le fichier CATH et récupère pour chaque nom de fichier l'ensemble des identifiants de chaines à récupérer. Ceci permet de n'ouvrir chacun des fichiers DSSP qu'une seule fois.
+
+Le programme récupère alors les chaines dans les fichiers DSSP et les écrit dans un fichier (une chaine par ligne). Pour ce faire, il parcoure le fichier ligne par ligne en utilisant les indices de colonnes pour récupérer les données (les champs de données dans un fichier DSSP ont une taille fixe).
+
+
+________
+
 
 === Parsage===
 Dans un premier lieu on va devoir récupérer toutes les informations nécéssaires au bon fonctionnement de notre programme dans les fichiers fournis dans le cours.
@@ -27,6 +43,48 @@ On va ensuite sauvegarder ces données dans un fichier avec la structure suivant
 > fichierParsé | nomProteine | organisme
 sequence
 structure secondaire
+
+________
+
+
+=== Calcul des fréquences ===
+
+Le programme parcoure le fichier créé lors de la phase précédente et à partir de chaque association séquence/structure, enregistre deux types de fréquences : la fréquence individuelle et la fréquence locale. Celles-ci seront cruciales lors de la troisième phase.
+
+== Fréquence individuelle ==
+
+La fréquence individuelle $$sfreq_{RS}$$ est le nombre de fois où le résidu R est impliqué dans une structure S. Elle permet de déterminer le score individuel, c'est-à-dire la probabilité que le résidu R se trouve dans une structure S.
+
+== Fréquence locale ==
+
+La fréquence locale $$pfreq_{RSmR_{m}}$$ est le nombre de fois où le résidu R est impliqué dans une structure S et situé à une distance m du résidu R_{m}. Cela permet de déterminer le score local, c'est-à-dire la probabilité que le résidu R se trouve dans une structure S en fonction des résidus de son entourage. Dans l'algorithme GORIII, les valeurs de m sont prises dans une fenêtre [-8,8] qui a été calculée à partir de la longueur moyenne des structures secondaires des protéines connues.
+
+=== Prédiction de la structure ===
+
+La troisième étape est la plus importante car elle effectue la prédiction. Le principe de base est de parcourir la séquence dont on veut prédire la structure et pour chaque résidu de calculer l'information d'appartenance à chaque structure. La structure dont l'information est la plus haute pour ce résidu sera la structure prédite.
+Mon algorithme additionne deux informations pour obtenir cette information d'appartenance : l'information directionnelle et l'information de pair. Elles ont pour point commun l'utilisation de la "window". Pour chaque résidu, l'information dépendra donc des résidus qui l'entourent.
+Ces informations sont calculées à partir du score individuel d'un résidu et du score local d'un résidu, eux-mêmes calculés à partir des fréquences obtenues lors de la phase précédente. Pour plus de détails, je vous renvoie à l'article de Jean Garnier et al. 1996 (http://www.ulb.ac.be/di/map/tlenaert/Home_Tom_Lenaerts/INFO-F-208_files/1996%20Garnier.pdf)
+
+Dans les formules suivantes, $$I(S_{j};R_{j})$$ est le score individuel d'un résidu R à l'emplacement j pour une structure S et $$I(S_{j};R_{j+m}|R_{j})$$ est le score local d'un résidu R à l'emplacement j pour une structure S en tant compte d'une window [-m;+m]
+
+== Information directionnelle ==
+
+L'information directionnelle comprend le score individuel du résidu auquel est ajouté le score individuel des résidus dans la "window" pondéré par la distance à laquelle ils se trouvent du résidu.
+
+$$I(S_{j};R_{1}..R_{m*2}) = I(S_{j};R_{j}) + \sum{m,m<>0}I(S_{m};R_{m})/abs(m)$$
+
+== Information de pair ==
+L'information de pair comprend le score individuel du résidu auquel est ajouté le score local des résidus dans la "window".
+
+$$I(S_{j};R_{1}..R_{m*2}) = I(S_{j};R_{j}) + \sum{m,m<>0}I(S_{j};R_{j+m}|R_{j})$$
+
+=== Tests de l'algorithme ===
+
+Alors on va tout d'abord parser et traiter "CATH_info.txt" qui seront nos données d'entraînement, ensuite on va faire de même avec "CATH_info_test.txt" qui seront nos données de test. Dans "CATH_info.txt"et "CATH_info_test.txt" on va récupérer la liste des fichier ".dssp" à parser et les chaînes qui devront être parsées dans les fichiers.
+On utilise les données d'entraînement pour créer le dictionnaire qui va contenir les fréquences nécessaires pour le calcul des prédictions.
+
+________
+
 
 ====Création du dictionnaire ====
 
