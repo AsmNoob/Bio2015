@@ -119,13 +119,9 @@ if(__name__ == "__main__"):
 			matricePseudoCount = ajoutPseudoCounts(matriceDesFrequences,len(listeDeSequences),listeSwissProt,calculAA(listeDeSequences))
 			PSSM = matrice_M(matricePseudoCount,listeSwissProt,calculAA(listeDeSequences))
 			verification = consensus(PSSM,calculAA(listeDeSequences))
-			print(len(PSSM[0] ))
 			writeToFile(PSSM,titre,calculAA(listeDeSequences))
 			bornes = input("Veuillez rentrer les bornes des positions que vous désirez comparer avec le weblogo (ex: '5 10'): ")
 			start,end = bornes.split()
-			print(int(start),int(end),len(verification))
-			print(int(start) < 0)
-			print(int(end) > len(verification))
 			while(int(start) < 0 or int(end) > len(verification)):
 				print("Vous avez dépassé les bornes du consensus(1:"+str(len(verification))+")\n")
 				bornes = input("Veuillez rentrer les bornes des positions que vous désirez comparer avec le weblogo (ex: '5 10'): ")

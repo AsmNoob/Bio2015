@@ -1,6 +1,6 @@
-===== Projet 4: Prédiction de la structure secndaire =====
+====== Projet 4: Prédiction de la structure secndaire ======
 
-==== Introduction ====
+===== Introduction =====
 
 
 La fonction d'une protéine et les intéractions entre plusieurs protéines dépendent directement de leur structure en trois dimensions qui elle-même dépend des différentes structures de segments locaux dans les protéines, appelées structure secondaire. Celle-ci est déterminée par les liens hydrogènes formés entre deux acides aminés (ou plus) de la protéine qui donnent au segment local une certaine structure. Les structures les plus courantes sont les α-helices, les ß-feuillet, les ß-tours et les bobines. 
@@ -11,19 +11,10 @@ L'algorithme GOR proposé par Jean Garnier et al. en 1978 analyse la probabilit�
 
 Le programme fonctionne en trois phases. Premièrement, il s'agit de parser un ensemble de fichier DSSP afin de récupérer un ensemble de séquences associées à leur structure. Deuxièment, le programme extrait des fréquences de cet ensemble de séquences. Pour terminer, le programme tente de prédire la structure d'un ensemble de séquences à partir de ces fréquences.
 
-==== Les phases du programme ====
+===== Les phases du programme =====
 
-=== Parsing des fichiers DSSP ===
+==== Parsing des fichiers DSSP ====
 
-Le parsing des fichiers DSSP est trivial mais un point mérite d'être soulevé : afin d'optimiser l'utilisation de la mémoire, le programme parcoure d'abord le fichier CATH et récupère pour chaque nom de fichier l'ensemble des identifiants de chaines à récupérer. Ceci permet de n'ouvrir chacun des fichiers DSSP qu'une seule fois.
-
-Le programme récupère alors les chaines dans les fichiers DSSP et les écrit dans un fichier (une chaine par ligne). Pour ce faire, il parcoure le fichier ligne par ligne en utilisant les indices de colonnes pour récupérer les données (les champs de données dans un fichier DSSP ont une taille fixe).
-
-
-________
-
-
-=== Parsage===
 Dans un premier lieu on va devoir récupérer toutes les informations nécéssaires au bon fonctionnement de notre programme dans les fichiers fournis dans le cours.
 On va utiliser le fichier "CATH_info.txt" afin de savoir quels fichiers dssp doivent être traités.
 
@@ -44,8 +35,7 @@ On va ensuite sauvegarder ces données dans un fichier avec la structure suivant
 sequence
 structure secondaire
 
-________
-
+==== Les fréquences ====
 
 === Calcul des fréquences ===
 
@@ -59,7 +49,7 @@ La fréquence individuelle $$sfreq_{RS}$$ est le nombre de fois où le résidu R
 
 La fréquence locale $$pfreq_{RSmR_{m}}$$ est le nombre de fois où le résidu R est impliqué dans une structure S et situé à une distance m du résidu R_{m}. Cela permet de déterminer le score local, c'est-à-dire la probabilité que le résidu R se trouve dans une structure S en fonction des résidus de son entourage. Dans l'algorithme GORIII, les valeurs de m sont prises dans une fenêtre [-8,8] qui a été calculée à partir de la longueur moyenne des structures secondaires des protéines connues.
 
-=== Prédiction de la structure ===
+==== Prédiction de la structure ====
 
 La troisième étape est la plus importante car elle effectue la prédiction. Le principe de base est de parcourir la séquence dont on veut prédire la structure et pour chaque résidu de calculer l'information d'appartenance à chaque structure. La structure dont l'information est la plus haute pour ce résidu sera la structure prédite.
 Mon algorithme additionne deux informations pour obtenir cette information d'appartenance : l'information directionnelle et l'information de pair. Elles ont pour point commun l'utilisation de la "window". Pour chaque résidu, l'information dépendra donc des résidus qui l'entourent.
@@ -77,13 +67,6 @@ $$I(S_{j};R_{1}..R_{m*2}) = I(S_{j};R_{j}) + \sum{m,m<>0}I(S_{m};R_{m})/abs(m)$$
 L'information de pair comprend le score individuel du résidu auquel est ajouté le score local des résidus dans la "window".
 
 $$I(S_{j};R_{1}..R_{m*2}) = I(S_{j};R_{j}) + \sum{m,m<>0}I(S_{j};R_{j+m}|R_{j})$$
-
-=== Tests de l'algorithme ===
-
-Alors on va tout d'abord parser et traiter "CATH_info.txt" qui seront nos données d'entraînement, ensuite on va faire de même avec "CATH_info_test.txt" qui seront nos données de test. Dans "CATH_info.txt"et "CATH_info_test.txt" on va récupérer la liste des fichier ".dssp" à parser et les chaînes qui devront être parsées dans les fichiers.
-On utilise les données d'entraînement pour créer le dictionnaire qui va contenir les fréquences nécessaires pour le calcul des prédictions.
-
-________
 
 
 ====Création du dictionnaire ====
@@ -110,6 +93,12 @@ A la fin du programme, il effectuer une mesure de qualité, c'est-à-dire que no
 
   * MCC : Cette mesure de qualité va quant à elle s'appliquer sur la notion de vrai/faux négatif/positif concernant une structure bien précise. Le vrai positif indique que la structure secondaire de l'acide aminé en question a été correctement prédite. Le vrai négatif indique que la structure secondaire des autres acides aminés a été correctement prédite. Un faux positif indique que on a prédit la structure secondaire alors qu'elle n'apparait pas dans la structure réelle et un faux négatif indique que l'on a prédit une autre structure secondaire que celle prévue dans la structure réelle. Une fois chacune de ces données rassemblées, on peut calculer le MCC selon la formule suivante: $MCC = (TP * TN - FP * FN)/((TP + FP)*(TP + FN)*(TN + FP)*(TN + FN))^1/2$ avec TP = TruePositive, TN = TrueNegative, FP = FalsePositive and FN = FalseNegative.
 Après avoir calculé chaque mesure de qualité pour chaque séquence, on peut calculer la qualité du modèle en temps que tel (en effectuant la qualité moyenne sur toutes).
+
+==== Tests de l'algorithme ====
+
+Alors on va tout d'abord parser et traiter "CATH_info.txt" qui seront nos données d'entraînement, ensuite on va faire de même avec "CATH_info_test.txt" qui seront nos données de test. Dans "CATH_info.txt"et "CATH_info_test.txt" on va récupérer la liste des fichier ".dssp" à parser et les chaînes qui devront être parsées dans les fichiers.
+On utilise les données d'entraînement pour créer le dictionnaire qui va contenir les fréquences nécessaires pour le calcul des prédictions.
+
 
 ====Bibliographie (simplifiée)====
   * http://plage-desinvolte.pagesperso-orange.fr/d_agora/d_bioinfo/N-bioinfo.pdf
