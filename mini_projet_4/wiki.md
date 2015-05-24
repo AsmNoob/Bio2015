@@ -1,7 +1,8 @@
-====== Projet 4: Prédiction de la structure secndaire ======
+====== Projet 4: Prédiction de la structure secondaire ======
 
 ===== Introduction =====
 
+Projet à télécharger: {{:f20815:start:333083:mini_projet_4.zip|}}
 
 La fonction d'une protéine et les intéractions entre plusieurs protéines dépendent directement de leur structure en trois dimensions qui elle-même dépend des différentes structures de segments locaux dans les protéines, appelées structure secondaire. Celle-ci est déterminée par les liens hydrogènes formés entre deux acides aminés (ou plus) de la protéine qui donnent au segment local une certaine structure. Les structures les plus courantes sont les α-helices, les ß-feuillet, les ß-tours et les bobines. 
 
@@ -35,40 +36,6 @@ On va ensuite sauvegarder ces données dans un fichier avec la structure suivant
 sequence
 structure secondaire
 
-==== Les fréquences ====
-
-=== Calcul des fréquences ===
-
-Le programme parcoure le fichier créé lors de la phase précédente et à partir de chaque association séquence/structure, enregistre deux types de fréquences : la fréquence individuelle et la fréquence locale. Celles-ci seront cruciales lors de la troisième phase.
-
-== Fréquence individuelle ==
-
-La fréquence individuelle $$sfreq_{RS}$$ est le nombre de fois où le résidu R est impliqué dans une structure S. Elle permet de déterminer le score individuel, c'est-à-dire la probabilité que le résidu R se trouve dans une structure S.
-
-== Fréquence locale ==
-
-La fréquence locale $$pfreq_{RSmR_{m}}$$ est le nombre de fois où le résidu R est impliqué dans une structure S et situé à une distance m du résidu R_{m}. Cela permet de déterminer le score local, c'est-à-dire la probabilité que le résidu R se trouve dans une structure S en fonction des résidus de son entourage. Dans l'algorithme GORIII, les valeurs de m sont prises dans une fenêtre [-8,8] qui a été calculée à partir de la longueur moyenne des structures secondaires des protéines connues.
-
-==== Prédiction de la structure ====
-
-La troisième étape est la plus importante car elle effectue la prédiction. Le principe de base est de parcourir la séquence dont on veut prédire la structure et pour chaque résidu de calculer l'information d'appartenance à chaque structure. La structure dont l'information est la plus haute pour ce résidu sera la structure prédite.
-Mon algorithme additionne deux informations pour obtenir cette information d'appartenance : l'information directionnelle et l'information de pair. Elles ont pour point commun l'utilisation de la "window". Pour chaque résidu, l'information dépendra donc des résidus qui l'entourent.
-Ces informations sont calculées à partir du score individuel d'un résidu et du score local d'un résidu, eux-mêmes calculés à partir des fréquences obtenues lors de la phase précédente. Pour plus de détails, je vous renvoie à l'article de Jean Garnier et al. 1996 (http://www.ulb.ac.be/di/map/tlenaert/Home_Tom_Lenaerts/INFO-F-208_files/1996%20Garnier.pdf)
-
-Dans les formules suivantes, $$I(S_{j};R_{j})$$ est le score individuel d'un résidu R à l'emplacement j pour une structure S et $$I(S_{j};R_{j+m}|R_{j})$$ est le score local d'un résidu R à l'emplacement j pour une structure S en tant compte d'une window [-m;+m]
-
-== Information directionnelle ==
-
-L'information directionnelle comprend le score individuel du résidu auquel est ajouté le score individuel des résidus dans la "window" pondéré par la distance à laquelle ils se trouvent du résidu.
-
-$$I(S_{j};R_{1}..R_{m*2}) = I(S_{j};R_{j}) + \sum{m,m<>0}I(S_{m};R_{m})/abs(m)$$
-
-== Information de pair ==
-L'information de pair comprend le score individuel du résidu auquel est ajouté le score local des résidus dans la "window".
-
-$$I(S_{j};R_{1}..R_{m*2}) = I(S_{j};R_{j}) + \sum{m,m<>0}I(S_{j};R_{j+m}|R_{j})$$
-
-
 ====Création du dictionnaire ====
 
 Pour l'implémentation de GOR III, on a besoin de garder un certain nombre de couple de valeur pour le calcul des logarithmes. 
@@ -78,6 +45,12 @@ Pour ce faire, on déclare un dictionnaire auquel va venir s'ajouter tous les co
 Ces couples/triples de valeurs feront office de clefs dont les valeurs représenteront les occurences de ces combinaisons. 
 
 Une fois toutes les séquences traitées, les combinaisons présentes dans le dictionnaire vont permettre de prédire la structure secondaire d'un acide aminé en particulier. Ce dictionnaire est envoyé à l'algorithme de calcul.
+
+==== Prédiction de la structure ====
+
+Le principe de base est de parcourir la séquence dont on veut prédire la structure et pour chaque résidu de calculer l'information d'appartenance à chaque structure. La structure dont l'information est la plus haute pour ce résidu sera la structure prédite.
+Mon algorithme additionne deux informations pour obtenir cette information d'appartenance : l'information directionnelle et l'information de pair. Pour chaque résidu, l'information dépendra donc des résidus qui l'entourent.
+Ces informations sont calculées à partir du score individuel d'un résidu et du score local d'un résidu, eux-mêmes calculés à partir des fréquences obtenues lors de la phase précédente. Pour plus de détails, je vous renvoie à l'article de Jean Garnier et al. 1996 (http://www.ulb.ac.be/di/map/tlenaert/Home_Tom_Lenaerts/INFO-F-208_files/1996%20Garnier.pdf)
 
 ==== Algorithme GORIII ====
 
